@@ -1,4 +1,4 @@
-Xgboost + SMOTE trained model results:
+XGBoost + SMOTE trained model results:
 -----------------------------------------------------
 Classification report:
 
