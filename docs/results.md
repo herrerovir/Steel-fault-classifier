@@ -1,7 +1,0 @@
-# Conclusiones
-
-El objetivo de este ejercicio fue construir un modelo de machine learning para detectar anomalías o defectos en placas de acero industrial. Para lograrlo, se inició con la limpieza del conjunto de datos, un paso fundamental para asegurar la integridad y confiabilidad de la información. Seguidamente, se realizó un análisis exploratorio detallado que permitió comprender mejor la distribución y las relaciones entre las variables. Este análisis incluyó la evaluación individual de cada variable y la exploración de interacciones significativas entre pares de ellas. Esto permitió crear nuevas variables que hacen más fácil el modelado. 
-
-Para determinar el modelo óptimo para la predicción de anomalías, se probaron varios enfoques: decision tree, random forest, xgboost, support vector machine y multilayer perceptron. Se concluyó que el modelo con mejor rendimiento fue XGBoost. Posteriormente, se buscó encontrar los hiperparámetros ideales para este modelo. Dado que durante la exploración de datos se identificó un desbalance en el conjunto, se aplicó la técnica de re-muestreo **SMOTE**. Este modelo no solo mostró el mejor rendimiento, sino que también destacó en precisión y recall.
-
-En resumen, se construyó un modelo de machine learning robusto capaz de distinguir entre clases minoritarias y mayoritarias, ofreciendo un rendimiento sólido y constituyendo la mejor opción para resolver este problema.. 
