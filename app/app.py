@@ -26,106 +26,148 @@ def load_model_and_scaler():
 model, scaler = load_model_and_scaler()
 
 # --- App UI ---
-st.set_page_config(page_title = "Steel Fault Classifier", layout = "centered")
 
-# Center title and description
+st.set_page_config(page_title = "Steel Fault Classifier", layout = "wide")
+
+# Customize style
 st.markdown(
     """
     <style>
     .centered-text {
         text-align: center;
     }
+    .result-box {
+        background-color: #74add1;
+        padding: 1rem;
+        border-radius: 0.4rem;
+        font-weight: bold;
+        color: white;
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 1.2rem;
+    }
     </style>
     """,
     unsafe_allow_html = True,
 )
 
-# Title and description
+# Title and description (centered)
 st.markdown('<h1 class="centered-text">Steel Fault Classifier</h1>', unsafe_allow_html = True)
-st.markdown('<p class="centered-text">Enter process parameters to predict the steel fault type (not all parameters are required).</p>', unsafe_allow_html = True)
-st.write("")  # Spacer
+st.markdown('<p class="centered-text">Enter the process parameters to predict the steel fault type. Not all parameters are required.</p>', unsafe_allow_html = True)
 
-# --- Feature Input Section ---
+# --- Sidebar for Example Values ---
 
-FEATURES = ["Pixels_Areas", "Length_of_Conveyer", "Steel_Type_A300", "Steel_Type_A400",
-            "Steel_Plate_Thickness", "Empty_Index", "Square_Index", "Outside_Global_Index",
-            "Orientation_Index", "Luminosity_Index", "X_Range", "Y_Range", "Defect_Area", 
-            "Edge", "Outside_X_Range", "Log_Area", "Luminosity_Sum_Range", "Log_Area_Sigmoid"]
+with st.sidebar:
+    st.subheader("Example Feature Values:")
+    EXAMPLES = {
+        "Defect_Area": "100", "Edge": "0.10", "Empty_Index": "0.10",
+        "Length_of_Conveyer": "1000", "Log_Area": "1.10", "Log_Area_Sigmoid": "1.10",
+        "Luminosity_Index": "0.10", "Luminosity_Sum_Range": "110000", "Orientation_Index": "0.10",
+        "Outside_Global_Index": "0", "Outside_X_Range": "0.10", "Pixels_Areas": "200",
+        "Steel_Plate_Thickness": "100", "Steel_Type_A300": "0", "Steel_Type_A400": "0",
+        "Square_Index": "0.10", "X_Range": "10", "Y_Range": "10"
+    }
 
-CLASS_NAMES = {0: "Pastry", 1: "Z_Scratch", 2: "K_Scratch", 3: "Stains", 4: "Dirtiness", 5: "Bumps", 6: "Other_Faults"}
+    for feature, example in EXAMPLES.items():
+        st.write(f"{feature.replace('_', ' ').title()}: **{example}**")
+        
+# --- Main Panel for Input Fields ---
 
-# Divide FEATURES into 3 groups for columns
-group_size = len(FEATURES) // 3
-cols = st.columns(3)
+st.subheader("Feature Values")
 
+FEATURES = [
+    "Pixels_Areas", "Length_of_Conveyer", "Steel_Type_A300", 
+    "Steel_Type_A400", "Steel_Plate_Thickness", "Empty_Index", 
+    "Square_Index", "Outside_Global_Index", "Orientation_Index", 
+    "Luminosity_Index", "X_Range", "Y_Range", "Defect_Area", 
+    "Edge", "Outside_X_Range", "Log_Area", "Luminosity_Sum_Range", 
+    "Log_Area_Sigmoid" 
+]
+
+# Create 3 columns
+col1, col2, col3 = st.columns(3)
+
+# Assign features to the columns (6 features per column)
 input_data = []
 
-for i, feature in enumerate(FEATURES):
-    col_idx = i // group_size
-    if col_idx > 2:
-        col_idx = 2
-    with cols[col_idx]:
-        # Replace underscores with spaces and capitalize properly
+# Column 1
+with col1:
+    for i in range(6):
+        feature = FEATURES[i]
         display_name = feature.replace("_", " ").title()
         value = st.number_input(
             display_name,
-            value = 0.0,
+            value = float(EXAMPLES[feature]),  # Set default to example values
             step = 0.1,
-            format = "%.4f",
+            format = "%.2f",
             key = feature
         )
         input_data.append(value)
 
-input_array = np.array(input_data).reshape(1, -1)
+# Column 2
+with col2:
+    for i in range(6, 12):
+        feature = FEATURES[i]
+        display_name = feature.replace("_", " ").title()
+        value = st.number_input(
+            display_name,
+            value = float(EXAMPLES[feature]),
+            step = 0.1,
+            format = "%.2f",
+            key = feature
+        )
+        input_data.append(value)
 
-st.write("")  # Spacer
+# Column 3
+with col3:
+    for i in range(12, len(FEATURES)):
+        feature = FEATURES[i]
+        display_name = feature.replace("_", " ").title()
+        value = st.number_input(
+            display_name,
+            value = float(EXAMPLES[feature]),
+            step = 0.1,
+            format = "%.2f",
+            key = feature
+        )
+        input_data.append(value)
 
 # --- Prediction Section ---
+
+input_array = np.array(input_data).reshape(1, -1)
+
+CLASS_NAMES = {
+    0: "Pastry", 1: "Z_Scratch", 2: "K_Scratch", 3: "Stains", 
+    4: "Dirtiness", 5: "Bumps", 6: "Other_Faults"
+}
+
 if st.button("Predict Fault Type"):
     input_df = pd.DataFrame(input_array, columns=FEATURES)
     input_scaled = scaler.transform(input_df)
     
     prediction = model.predict(input_scaled)[0]
     predicted_name = CLASS_NAMES.get(prediction, "Unknown")
-    
-    st.write("### Prediction")
+
+    st.write("### Prediction Result")
     
     if hasattr(model, "predict_proba"):
         probabilities = model.predict_proba(input_scaled)[0]
         predicted_prob = probabilities[prediction]
         st.markdown(
             f"""
-            <div style="
-                background-color:#74add1;
-                padding: 1rem;
-                border-radius: 0.4rem;
-                font-weight: bold;
-                color: white;
-                margin-top: 1rem;
-                text-align: center;
-                font-size: 1.2rem;
-            ">
+            <div class="result-box">
                 Predicted Fault Type: <strong>{predicted_name.replace("_", " ").title()}</strong><br>
                 Probability: <strong>{predicted_prob:.2%}</strong>
             </div>
             """,
-            unsafe_allow_html = True
+            unsafe_allow_html=True
         )
     else:
         st.markdown(
             f"""
-            <div style="
-                background-color:#74add1;
-                padding: 1rem;
-                border-radius: 0.4rem;
-                font-weight: bold;
-                color: white;
-                margin-top: 1rem;
-                text-align: center;
-                font-size: 1.2rem;
-            ">
+            <div class="result-box">
                 Predicted Fault Type: <strong>{predicted_name.replace("_", " ").title()}</strong>
             </div>
             """,
-            unsafe_allow_html = True
+            unsafe_allow_html=True
         )
