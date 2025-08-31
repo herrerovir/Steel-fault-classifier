@@ -52,7 +52,7 @@ st.markdown(
 )
 
 # Title and description (centered)
-st.markdown('<h1 class="centered-text">Steel Fault Classifier</h1>', unsafe_allow_html = True)
+st.markdown('<h1 class="centered-text">Industrial Steel Fault Detection System</h1>', unsafe_allow_html = True)
 st.markdown('<p class="centered-text">Enter the process parameters to predict the steel fault type. Not all parameters are required.</p>', unsafe_allow_html = True)
 
 # --- Sidebar for Example Values ---
